@@ -185,6 +185,50 @@ input[type=range]{width:100%;accent-color:var(--semola)}
   letter-spacing:.15em;margin-bottom:.5rem}
 .conc .card p{margin:0;font-size:.98rem}
 
+/* PANEL INTERACTIVO foto ↔ Bessel */
+.modo-panel{display:none;position:fixed;inset:0;background:rgba(8,9,12,.96);z-index:200;
+  align-items:center;justify-content:center;padding:1.5rem;gap:2rem;flex-wrap:wrap}
+.modo-panel.on{display:flex}
+.modo-panel .mp-close{position:absolute;top:1.2rem;right:1.8rem;color:var(--tinta-soft);
+  font-size:2rem;cursor:pointer;line-height:1;z-index:201}
+.modo-panel .mp-foto{flex:0 0 auto;text-align:center}
+.modo-panel .mp-foto img{max-width:min(42vw,340px);max-height:70vh;border-radius:10px;
+  border:1px solid var(--linea);display:block}
+.modo-panel .mp-foto .mp-label{font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  color:var(--semola);letter-spacing:.1em;margin-top:.7rem;text-transform:uppercase}
+.modo-panel .mp-sep{width:1px;background:var(--linea);align-self:stretch;flex:0 0 auto}
+.modo-panel .mp-teoria{flex:0 0 auto;text-align:center}
+.modo-panel .mp-teoria canvas{border-radius:50%;border:2px solid var(--linea);
+  background:radial-gradient(circle,#1a1d23,#0d0f13)}
+.modo-panel .mp-teoria .mp-modo{font-family:'Fraunces',Georgia,serif;font-size:2rem;
+  color:var(--semola);margin-top:.8rem}
+.modo-panel .mp-teoria .mp-datos{font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  color:var(--tinta-soft);margin-top:.4rem;line-height:1.8}
+.modo-panel .mp-teoria .mp-datos span{color:var(--semola)}
+.modo-panel .mp-mudo{text-align:center;padding:2rem}
+.modo-panel .mp-mudo .mp-icon{font-size:3rem;margin-bottom:1rem}
+.modo-panel .mp-mudo p{font-family:'JetBrains Mono',monospace;font-size:.9rem;
+  color:var(--tinta-soft);max-width:340px;line-height:1.7}
+
+/* TABLA DE IDENTIFICACIÓN DE MODOS */
+.modos-tabla-wrap{overflow-x:auto;margin:1.8rem 0}
+.modos-tabla{width:100%;border-collapse:collapse;font-size:.88rem}
+.modos-tabla th,.modos-tabla td{padding:.7rem .8rem;text-align:left;border-bottom:1px solid var(--linea)}
+.modos-tabla th{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--semola);font-weight:600}
+.modos-tabla td{color:#d4d8dd}
+.modos-tabla tr:hover td{background:var(--membrana-2)}
+.modos-tabla .tc{font-family:'JetBrains Mono',monospace;color:var(--tinta)}
+.modos-tabla .modo-badge{display:inline-block;font-family:'JetBrains Mono',monospace;
+  font-size:.72rem;padding:.2rem .55rem;border-radius:4px;
+  background:rgba(232,213,154,.12);color:var(--semola);white-space:nowrap}
+.modos-tabla .modo-badge.mudo{background:rgba(156,163,175,.1);color:var(--tinta-soft)}
+.mini-bessel-cell{display:flex;align-items:center;justify-content:center}
+.mini-bessel-cell canvas{border-radius:50%;border:1px solid var(--linea);
+  background:radial-gradient(circle,#1a1d23,#0d0f13);cursor:pointer;
+  transition:transform .2s,border-color .2s}
+.mini-bessel-cell canvas:hover{transform:scale(1.15);border-color:var(--semola)}
+
 /* LIGHTBOX */
 .lightbox{position:fixed;inset:0;background:rgba(8,9,12,.95);z-index:200;display:none;
   align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
@@ -228,6 +272,7 @@ footer a{color:var(--semola)}
     <li><a href="#marco">Marco teórico</a></li>
     <li><a href="#montaje">Montaje</a></li>
     <li><a href="#galeria">Galería</a></li>
+    <li><a href="#identificacion">Identificación</a></li>
     <li><a href="#analisis">Análisis</a></li>
     <li><a href="#resultados">Resultados</a></li>
     <li><a href="#conclusiones">Conclusiones</a></li>
@@ -375,6 +420,38 @@ footer a{color:var(--semola)}
     <button data-f="aguda">Agudas (&gt;2 kHz)</button>
   </div>
   <div class="galeria" id="galGrid"></div>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--tinta-soft);
+     text-align:center;margin-top:1.2rem;letter-spacing:.05em;">
+    ↑ toca cualquier figura para ver el modo de Bessel teórico correspondiente
+  </p>
+</section>
+<div class="divider"></div>
+
+<!-- IDENTIFICACIÓN DE MODOS -->
+<section class="block wide" id="identificacion">
+  <span class="sec-num">05b / Identificación de modos</span>
+  <h2>Cada figura, su modo teórico</h2>
+  <p>La siguiente tabla asigna a cada figura observada el modo normal $(m,n)$ más probable, junto con su cero de Bessel $\alpha_{mn}$ y una simulación en miniatura. Haz clic en cualquier mini-simulador para ampliarlo junto a la foto.</p>
+  <div class="modos-tabla-wrap">
+  <table class="modos-tabla" id="modosTabla">
+    <thead>
+      <tr>
+        <th>Freq.</th>
+        <th>Onda</th>
+        <th>Modo (m,n)</th>
+        <th>α<sub>mn</sub></th>
+        <th>Líneas / Anillos</th>
+        <th>Simulación</th>
+      </tr>
+    </thead>
+    <tbody id="modosTablaBody"></tbody>
+  </table>
+  </div>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tinta-soft);
+     margin-top:.8rem;letter-spacing:.03em;">
+    * Los modos de las figuras por encima de 2 kHz son estimaciones de orden de magnitud;
+    a esas frecuencias los patrones mezclan varios modos simultáneamente.
+  </p>
 </section>
 <div class="divider"></div>
 
@@ -417,8 +494,8 @@ footer a{color:var(--semola)}
   </div>
   <p>Para comprobar esto con datos y no solo a ojo, se hizo un análisis del audio en Python.</p>
 
-  <h3>Verificación cuantitativa con Python (FFT)</h3>
-  <p>Para comprobar todo esto con datos y no solo a ojo, se extrajo el audio de ocho videos y se les aplicó la <strong>Transformada Rápida de Fourier (FFT)</strong>, que descompone un sonido en las frecuencias que lo forman. Si la onda cuadrada realmente contiene armónicos, la FFT debe mostrarlos como picos adicionales junto a la fundamental. Los espectros completos y la tabla de mediciones están en la sección de resultados.</p>
+  <h3>Verificación del contenido armónico con Python (FFT)</h3>
+  <p>Para confirmar la diferencia entre formas de onda con datos, se extrajo el audio de ocho videos y se aplicó la <strong>Transformada Rápida de Fourier (FFT)</strong>, que descompone un sonido en las frecuencias que lo forman. La pregunta no es si la frecuencia sale bien —sale de una app que la controla directamente—, sino si la onda cuadrada y triangular realmente contienen frecuencias adicionales que la senoidal no tiene, y si eso explica por qué marcan los patrones con más energía.</p>
 </section>
 <div class="divider"></div>
 
@@ -426,37 +503,49 @@ footer a{color:var(--semola)}
 <section class="block" id="resultados">
   <span class="sec-num">07 / Resultados</span>
   <h2>Los datos</h2>
-  <p>Se analizaron <strong>ocho videos</strong> con FFT. En siete de ellos la frecuencia medida coincide con la programada con un error menor al 0.2 %, validando el control del experimento. El octavo (13 000 Hz) reveló una limitación del equipo de grabación que se explica más abajo.</p>
+  <p>Se analizaron <strong>ocho videos</strong> con FFT. El resultado principal no es verificar la frecuencia —que la app reproduce correctamente—, sino confirmar que las ondas cuadrada y triangular contienen <strong>armónicos impares</strong> (3f, 5f…) ausentes en la senoidal. Esa energía extra en múltiples frecuencias explica por qué forman los patrones con mayor rapidez y contraste.</p>
   <div class="tabla-wrap">
   <table>
-    <thead><tr><th>Frecuencia</th><th>Onda</th><th>Medida FFT</th><th>Error</th><th>Armónicos detectados</th></tr></thead>
+    <thead><tr><th>Frecuencia</th><th>Onda</th><th>Armónicos detectados (FFT)</th><th>Interpretación</th></tr></thead>
     <tbody>
-      <tr><td class="mono">350 Hz</td><td><span class="tag">seno</span></td><td class="mono">349.9 Hz</td><td class="mono">0.0 %</td><td>ninguno (tono puro)</td></tr>
-      <tr><td class="mono">550 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">550.9 Hz</td><td class="mono">0.2 %</td><td class="mono">3f, 5f</td></tr>
-      <tr><td class="mono">650 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">649.3 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
-      <tr><td class="mono">720 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">720.4 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
-      <tr><td class="mono">840 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">840.8 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
-      <tr><td class="mono">920 Hz</td><td><span class="tag">seno</span></td><td class="mono">918.8 Hz</td><td class="mono">0.1 %</td><td>ninguno (tono puro)</td></tr>
-      <tr><td class="mono">970 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">970.8 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
-      <tr><td class="mono">13 kHz</td><td><span class="tag sq">cuadrada</span></td><td class="mono" style="color:var(--rojo)">1301 Hz ⚠</td><td class="mono" style="color:var(--rojo)">90 %</td><td>distorsionados</td></tr>
+      <tr><td class="mono">350 Hz</td><td><span class="tag">seno</span></td><td>ninguno</td><td>Tono puro — una sola frecuencia excita la membrana</td></tr>
+      <tr><td class="mono">550 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">3f (1650 Hz), 5f (2750 Hz)</td><td>Dos armónicos activos — excita tres modos a la vez</td></tr>
+      <tr><td class="mono">650 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">3f (1950 Hz)</td><td>Armónico visible aunque atenuado</td></tr>
+      <tr><td class="mono">720 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">3f (2160 Hz)</td><td>Armónico de menor amplitud que la cuadrada (decae como 1/n²)</td></tr>
+      <tr><td class="mono">840 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">3f (2520 Hz)</td><td>Igual que arriba</td></tr>
+      <tr><td class="mono">920 Hz</td><td><span class="tag">seno</span></td><td>ninguno</td><td>Tono puro — patrón más lento de formar</td></tr>
+      <tr><td class="mono">970 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">3f (2910 Hz)</td><td>Armónico bien definido</td></tr>
+      <tr><td class="mono">13 kHz</td><td><span class="tag sq">cuadrada</span></td><td colspan="2" style="color:var(--rojo)">⚠ El micrófono del teléfono no registra fielmente esta frecuencia — el patrón sí se formó en la membrana</td></tr>
     </tbody>
   </table>
   </div>
 
   <figure>
     <img src="espectros_fft.png" alt="Espectros FFT de los 8 videos">
-    <figcaption><b>Fig. 1 —</b> Espectros de los 8 videos. Las <b>senoidales</b> (350 y 920 Hz, azul) son picos limpios y solitarios. Las <b>cuadradas</b> (550, 650, 970 Hz, naranja) y las <b>triangulares</b> (720, 840 Hz, verde) muestran armónicos (picos en 3f). El caso de <b>13 kHz</b> (rojo) aparece distorsionado: el micrófono midió 1301 Hz en lugar de 13 000 Hz.</figcaption>
+    <figcaption><b>Fig. 1 —</b> Espectros FFT de los 8 videos. Las <b>senoidales</b> (350 y 920 Hz, azul) muestran un único pico limpio. Las <b>cuadradas</b> (550, 650, 970 Hz, naranja) y <b>triangulares</b> (720, 840 Hz, verde) presentan picos adicionales en 3f y 5f: esos armónicos depositan energía en más modos de la membrana simultáneamente, de ahí que formen el patrón más rápido. El caso de <b>13 kHz</b> (rojo) aparece distorsionado por el límite del micrófono del teléfono.</figcaption>
   </figure>
 
   <div class="analogia">
     <p><strong>El caso de los 13 000 Hz y el límite del micrófono.</strong> En este video la FFT no midió 13 kHz sino 1301 Hz, con un espectro lleno de picos desordenados. Esto no es un fallo del experimento: el patrón en la membrana sí se formó (y es de los más densos y bonitos). Lo que falla es la <strong>grabación</strong>: el micrófono de un teléfono está optimizado para la voz humana y empieza a distorsionar o atenuar las frecuencias muy altas, plegándolas hacia abajo (un efecto relacionado con el <em>aliasing</em>). Es una limitación instrumental conocida y un buen recordatorio de que medir un fenómeno y registrarlo fielmente son dos retos distintos.</p>
   </div>
 
-  <h3>Detección automática de líneas nodales</h3>
-  <p>El segundo análisis procesa el video cuadro a cuadro: aísla la membrana con un detector de círculos y separa la arena clara del fondo oscuro, contando las regiones del patrón como medida del orden modal.</p>
+  <h3>Análisis de complejidad de patrones por imagen</h3>
+  <p>El segundo análisis aplica visión computacional a las <strong>15 fotografías representativas</strong> del experimento: detecta automáticamente el círculo de la membrana con la transformada de Hough, recorta la región interior y calcula la <strong>varianza del Laplaciano</strong> de la imagen mejorada con CLAHE. El Laplaciano amplifica los bordes y las transiciones abruptas —exactamente las líneas nodales—, por lo que su varianza crece cuando hay más líneas en el patrón. El valor se normaliza para compararlo con la predicción teórica de nodos totales derivada de los ceros de Bessel.</p>
+
+  <figure>
+    <img src="complejidad_patrones.png" alt="Complejidad del patrón vs frecuencia">
+    <figcaption><b>Fig. 2 —</b> <b>Arriba:</b> índice de complejidad medido en cada imagen (puntos amarillo→rojo según valor) frente a la predicción teórica de Bessel (línea discontinua gris). La tendencia ascendente confirma que a mayor frecuencia hay más líneas nodales. Las oscilaciones punto a punto reflejan variaciones de iluminación entre tomas, no discontinuidades físicas. <b>Abajo:</b> las 15 memorias recortadas a la membrana circular, con el borde coloreado según su complejidad medida.</figcaption>
+  </figure>
+
+  <div class="analogia">
+    <p>La varianza del Laplaciano es la misma métrica que usan las cámaras para detectar si una foto está enfocada: una imagen con muchos bordes nítidos tiene varianza alta. Aquí los "bordes" son las acumulaciones de arena en las líneas nodales. A frecuencias bajas (100–300 Hz) la arena no forma líneas → varianza baja. A frecuencias altas (4887 Hz, 13 kHz) la membrana tiene decenas de líneas → varianza alta.</p>
+  </div>
+
+  <h3>Detección en video — 970 Hz</h3>
+  <p>Como verificación adicional, el análisis cuadro a cuadro del video de 970 Hz permite aislar la membrana y segmentar el material acumulado en las líneas nodales.</p>
   <figure>
     <img src="nodos_970hz.png" alt="Detección de nodos a 970 Hz">
-    <figcaption><b>Fig. 2 —</b> Cuadro final del video de 970 Hz. <b>Izq.:</b> membrana original con la región circular detectada (verde). <b>Der.:</b> la arena segmentada, revelando un patrón de orden alto con varias líneas nodales.</figcaption>
+    <figcaption><b>Fig. 3 —</b> Cuadro final del video de 970 Hz. <b>Izq.:</b> membrana original con la región circular detectada (verde). <b>Der.:</b> la arena segmentada, revelando el patrón de 5 lóbulos correspondiente al modo (4,1).</figcaption>
   </figure>
 
   <p>Los ocho videos analizados, en orden de frecuencia creciente:</p>
@@ -500,6 +589,25 @@ footer a{color:var(--semola)}
   <p>27 configuraciones registradas · Análisis de audio y video con Python (OpenCV · SciPy · FFT)</p>
 </footer>
 
+<!-- PANEL INTERACTIVO FOTO ↔ BESSEL -->
+<div class="modo-panel" id="modoPanel">
+  <span class="mp-close" id="mpClose">×</span>
+  <div class="mp-foto" id="mpFoto">
+    <img id="mpImg" src="" alt="">
+    <div class="mp-label" id="mpFotoLabel"></div>
+  </div>
+  <div class="mp-sep"></div>
+  <div class="mp-teoria" id="mpTeoria">
+    <canvas id="mpCanvas" width="260" height="260"></canvas>
+    <div class="mp-modo" id="mpModo"></div>
+    <div class="mp-datos" id="mpDatos"></div>
+  </div>
+  <div class="mp-mudo" id="mpMudo" style="display:none">
+    <div class="mp-icon">〜</div>
+    <p>A esta frecuencia la membrana aún no tiene un modo resonante activo. La arena se sacude sin organizarse en líneas nodales definidas.</p>
+  </div>
+</div>
+
 <div class="lightbox" id="lightbox">
   <span class="lb-close" id="lbClose">×</span>
   <img id="lbImg" src="" alt="">
@@ -507,78 +615,260 @@ footer a{color:var(--semola)}
 </div>
 
 <script>
-/* ===== CATÁLOGO DE FIGURAS ===== */
-const FIGS=[
-  {f:"100 Hz",  hz:100,  onda:"seno",      img:"100hz.jpg",            nota:"régimen mudo"},
-  {f:"300 Hz",  hz:300,  onda:"seno",      img:"300hz.jpg",            nota:"régimen mudo"},
-  {f:"350 Hz",  hz:350,  onda:"seno",      img:"350hzseno.jpg"},
-  {f:"440 Hz",  hz:440,  onda:"seno",      img:"440hzseno.jpg"},
-  {f:"440 Hz",  hz:440,  onda:"cuadrada",  img:"440hzcuadra.jpg"},
-  {f:"440 Hz",  hz:440,  onda:"triangular",img:"440hztriangu.jpg"},
-  {f:"550 Hz",  hz:550,  onda:"seno",      img:"550hzseno.jpg"},
-  {f:"550 Hz",  hz:550,  onda:"cuadrada",  img:"550hzcuadra.jpg"},
-  {f:"550 Hz",  hz:550,  onda:"triangular",img:"550hztriangu.jpg"},
-  {f:"650 Hz",  hz:650,  onda:"cuadrada",  img:"650hzcuadrado.jpg"},
-  {f:"720 Hz",  hz:720,  onda:"seno",      img:"720hzseno.jpg"},
-  {f:"720 Hz",  hz:720,  onda:"cuadrada",  img:"720hzcuadra.jpg"},
-  {f:"720 Hz",  hz:720,  onda:"triangular",img:"720hztriangu.jpg"},
-  {f:"840 Hz",  hz:840,  onda:"seno",      img:"840hzseno.jpg"},
-  {f:"840 Hz",  hz:840,  onda:"triangular",img:"840hztriangu.jpg"},
-  {f:"888 Hz",  hz:888,  onda:"seno",      img:"888hzseno.jpg"},
-  {f:"920 Hz",  hz:920,  onda:"triangular",img:"920hztriangu.jpg"},
-  {f:"920 Hz",  hz:920,  onda:"cuadrada",  img:"920hzcuadraarriba.jpg",  nota:"parlante arriba"},
-  {f:"920 Hz",  hz:920,  onda:"seno",      img:"920hzsenoarriba.jpg",    nota:"parlante arriba"},
-  {f:"920 Hz",  hz:920,  onda:"triangular",img:"920hztrianguarriba.jpg", nota:"parlante arriba"},
-  {f:"970 Hz",  hz:970,  onda:"cuadrada",  img:"970hzcuadrada.jpg"},
-  {f:"1220 Hz", hz:1220, onda:"cuadrada",  img:"1220hzcuadrado.jpg"},
-  {f:"2170 Hz", hz:2170, onda:"seno",      img:"2170hzseno.jpg",       nota:"alto orden"},
-  {f:"4887 Hz", hz:4887, onda:"seno",      img:"4887hzseno.jpg",       nota:"alto orden"},
-  {f:"13 kHz",  hz:13000,onda:"cuadrada",  img:"13000hzcuadrado.jpg",  nota:"patrón celular"},
-  {f:"22 kHz",  hz:22000,onda:"cuadrada",  img:"22000hzcuadrado.jpg",  nota:"patrón celular"},
+/* ================================================================
+   DATOS COMPARTIDOS
+   ================================================================ */
+const ZEROS = {
+  '0,1':2.4048,'1,1':3.8317,'2,1':5.1356,'0,2':5.5201,
+  '3,1':6.3802,'1,2':7.0156,'2,2':8.4172,'0,3':8.6537,
+  '3,2':9.7610,'4,1':8.7715,'4,2':11.0647,
+  '5,1':10.1735,'5,2':13.3237,
+  '6,1':11.5777,'6,2':14.7960,'6,3':17.9598,
+  '8,4':25.0,'10,5':31.0
+};
+
+function besselJ(m, x) {
+  let s = 0;
+  for (let k = 0; k < 25; k++) {
+    let fk = 1, fkm = 1;
+    for (let i = 2; i <= k; i++) fk *= i;
+    for (let i = 2; i <= k + m; i++) fkm *= i;
+    s += Math.pow(-1, k) / (fk * fkm) * Math.pow(x / 2, 2 * k + m);
+  }
+  return s;
+}
+
+function dibujarModo(canvas, m, n, tol) {
+  const key = m + ',' + n;
+  const alpha = ZEROS[key];
+  if (!alpha) return;
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, R = W/2 - 3;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+  const im = ctx.createImageData(W, H);
+  const t = tol || 0.07;
+  for (let py = 0; py < H; py++) {
+    for (let px = 0; px < W; px++) {
+      const dx = px-cx, dy = py-cy, r = Math.sqrt(dx*dx+dy*dy);
+      const idx = (py*W+px)*4;
+      if (r > R) { im.data[idx+3]=0; continue; }
+      const th = Math.atan2(dy,dx);
+      const u = besselJ(m, alpha*r/R) * Math.cos(m*th);
+      if (Math.abs(u) < t) {
+        im.data[idx]=232; im.data[idx+1]=213; im.data[idx+2]=154; im.data[idx+3]=255;
+      } else {
+        const v = Math.min(255, 40+Math.abs(u)*60);
+        im.data[idx]=v*.55; im.data[idx+1]=v*.6; im.data[idx+2]=v*.7; im.data[idx+3]=255;
+      }
+    }
+  }
+  ctx.putImageData(im, 0, 0);
+}
+
+/* ================================================================
+   CATÁLOGO DE FIGURAS
+   ================================================================ */
+const FIGS = [
+  {f:"100 Hz",  hz:100,  onda:"seno",       img:"100hz.jpg",              modo:null,    nota:"régimen mudo"},
+  {f:"300 Hz",  hz:300,  onda:"seno",       img:"300hz.jpg",              modo:null,    nota:"régimen mudo"},
+  {f:"350 Hz",  hz:350,  onda:"seno",       img:"350hzseno.jpg",          modo:[1,1]},
+  {f:"440 Hz",  hz:440,  onda:"seno",       img:"440hzseno.jpg",          modo:[2,1]},
+  {f:"440 Hz",  hz:440,  onda:"cuadrada",   img:"440hzcuadra.jpg",        modo:[2,1]},
+  {f:"440 Hz",  hz:440,  onda:"triangular", img:"440hztriangu.jpg",       modo:[2,1]},
+  {f:"550 Hz",  hz:550,  onda:"seno",       img:"550hzseno.jpg",          modo:[3,1]},
+  {f:"550 Hz",  hz:550,  onda:"cuadrada",   img:"550hzcuadra.jpg",        modo:[3,1]},
+  {f:"550 Hz",  hz:550,  onda:"triangular", img:"550hztriangu.jpg",       modo:[3,1]},
+  {f:"650 Hz",  hz:650,  onda:"cuadrada",   img:"650hzcuadrado.jpg",      modo:[0,2]},
+  {f:"720 Hz",  hz:720,  onda:"seno",       img:"720hzseno.jpg",          modo:[3,1]},
+  {f:"720 Hz",  hz:720,  onda:"cuadrada",   img:"720hzcuadra.jpg",        modo:[3,1]},
+  {f:"720 Hz",  hz:720,  onda:"triangular", img:"720hztriangu.jpg",       modo:[3,1]},
+  {f:"840 Hz",  hz:840,  onda:"seno",       img:"840hzseno.jpg",          modo:[1,2]},
+  {f:"840 Hz",  hz:840,  onda:"triangular", img:"840hztriangu.jpg",       modo:[1,2]},
+  {f:"888 Hz",  hz:888,  onda:"seno",       img:"888hzseno.jpg",          modo:[2,2]},
+  {f:"920 Hz",  hz:920,  onda:"triangular", img:"920hztriangu.jpg",       modo:[3,2]},
+  {f:"920 Hz",  hz:920,  onda:"cuadrada",   img:"920hzcuadraarriba.jpg",  modo:[3,2], nota:"parlante arriba"},
+  {f:"920 Hz",  hz:920,  onda:"seno",       img:"920hzsenoarriba.jpg",    modo:[3,2], nota:"parlante arriba"},
+  {f:"920 Hz",  hz:920,  onda:"triangular", img:"920hztrianguarriba.jpg", modo:[3,2], nota:"parlante arriba"},
+  {f:"970 Hz",  hz:970,  onda:"cuadrada",   img:"970hzcuadrada.jpg",      modo:[4,1]},
+  {f:"1220 Hz", hz:1220, onda:"cuadrada",   img:"1220hzcuadrado.jpg",     modo:[4,2]},
+  {f:"2170 Hz", hz:2170, onda:"seno",       img:"2170hzseno.jpg",         modo:[5,2], nota:"alto orden*"},
+  {f:"4887 Hz", hz:4887, onda:"seno",       img:"4887hzseno.jpg",         modo:[6,3], nota:"alto orden*"},
+  {f:"13 kHz",  hz:13000,onda:"cuadrada",   img:"13000hzcuadrado.jpg",    modo:[8,4], nota:"patrón celular*"},
+  {f:"22 kHz",  hz:22000,onda:"cuadrada",   img:"22000hzcuadrado.jpg",    modo:[10,5],nota:"patrón celular*"},
 ];
 
+/* ================================================================
+   GALERÍA
+   ================================================================ */
 (function(){
-  const g=document.getElementById('galGrid');
-  function render(filtro){
-    g.innerHTML='';
-    FIGS.filter(x=>{
-      if(filtro==='all')return true;
-      if(filtro==='grave')return x.hz<500;
-      if(filtro==='aguda')return x.hz>=2000;
-      return x.onda===filtro;
-    }).forEach(x=>{
-      const d=document.createElement('div');
-      d.className='foto';
-      const cap=x.nota?x.onda+' · '+x.nota:x.onda;
-      d.innerHTML=`<img src="${x.img}" alt="${x.f} ${x.onda}" loading="lazy"
-                    data-lb="${x.f} · ${x.onda}${x.nota?' · '+x.nota:''}">
-                   <div class="cap"><div class="freq">${x.f}</div><div class="tipo">${cap}</div></div>`;
+  const g = document.getElementById('galGrid');
+
+  function render(filtro) {
+    g.innerHTML = '';
+    FIGS.filter(x => {
+      if (filtro==='all') return true;
+      if (filtro==='grave') return x.hz < 500;
+      if (filtro==='aguda') return x.hz >= 2000;
+      return x.onda === filtro;
+    }).forEach(x => {
+      const d = document.createElement('div');
+      d.className = 'foto';
+      const cap = x.nota ? x.onda+' · '+x.nota : x.onda;
+      const tag = x.modo
+        ? `<span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;
+             background:rgba(232,213,154,.12);color:var(--semola);
+             padding:.1rem .4rem;border-radius:3px;margin-left:.4rem">(${x.modo[0]},${x.modo[1]})</span>`
+        : `<span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;
+             background:rgba(156,163,175,.1);color:var(--tinta-soft);
+             padding:.1rem .4rem;border-radius:3px;margin-left:.4rem">mudo</span>`;
+      d.innerHTML = `
+        <img src="${x.img}" alt="${x.f} ${x.onda}" loading="lazy"
+             data-idx="${FIGS.indexOf(x)}" style="cursor:zoom-in">
+        <div class="cap">
+          <div class="freq">${x.f}${tag}</div>
+          <div class="tipo">${cap}</div>
+        </div>`;
       g.appendChild(d);
     });
   }
+
   render('all');
-  document.querySelectorAll('#galFiltros button').forEach(b=>{
-    b.onclick=()=>{
-      document.querySelectorAll('#galFiltros button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('#galFiltros button').forEach(b => {
+    b.onclick = () => {
+      document.querySelectorAll('#galFiltros button').forEach(x => x.classList.remove('on'));
       b.classList.add('on');
       render(b.dataset.f);
     };
   });
 })();
 
-/* ===== LIGHTBOX ===== */
+/* ================================================================
+   PANEL INTERACTIVO FOTO ↔ BESSEL
+   ================================================================ */
 (function(){
-  const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),
-        cap=document.getElementById('lbCap'),close=document.getElementById('lbClose');
-  document.body.addEventListener('click',e=>{
-    const t=e.target;
-    if(t.tagName==='IMG'&&t.dataset.lb){
-      img.src=t.src;cap.textContent=t.dataset.lb;lb.classList.add('on');
+  const panel   = document.getElementById('modoPanel');
+  const mpImg   = document.getElementById('mpImg');
+  const mpLabel = document.getElementById('mpFotoLabel');
+  const mpModo  = document.getElementById('mpModo');
+  const mpDatos = document.getElementById('mpDatos');
+  const mpTeoria= document.getElementById('mpTeoria');
+  const mpMudo  = document.getElementById('mpMudo');
+  const mpCanvas= document.getElementById('mpCanvas');
+
+  function abrirPanel(fig) {
+    mpImg.src = fig.img;
+    const nota = fig.nota ? ' · '+fig.nota : '';
+    mpLabel.textContent = fig.f+' · '+fig.onda+nota;
+
+    if (!fig.modo) {
+      mpTeoria.style.display = 'none';
+      mpMudo.style.display   = 'block';
+    } else {
+      mpTeoria.style.display = 'block';
+      mpMudo.style.display   = 'none';
+      const [m, n] = fig.modo;
+      const alpha = ZEROS[m+','+n] || '—';
+      const frel  = typeof alpha==='number' ? (alpha/ZEROS['0,1']).toFixed(2)+'×' : '—';
+      mpModo.textContent = 'Modo ('+m+', '+n+')';
+      mpDatos.innerHTML =
+        'α<sub>'+m+n+'</sub> = <span>'+(typeof alpha==='number'?alpha.toFixed(4):alpha)+'</span><br>'+
+        'Líneas en cruz: <span>'+m+'</span><br>'+
+        'Anillos: <span>'+(n-1)+'</span><br>'+
+        'f / f₀ = <span>'+frel+'</span>';
+      dibujarModo(mpCanvas, m, n, 0.07);
+    }
+    panel.classList.add('on');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function cerrar() {
+    panel.classList.remove('on');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('mpClose').onclick = cerrar;
+  panel.addEventListener('click', e => { if (e.target===panel) cerrar(); });
+  addEventListener('keydown', e => { if (e.key==='Escape') cerrar(); });
+
+  /* Clic desde galería */
+  document.getElementById('galGrid').addEventListener('click', e => {
+    const img = e.target.closest('img[data-idx]');
+    if (!img) return;
+    const idx = parseInt(img.dataset.idx, 10);
+    if (!isNaN(idx)) abrirPanel(FIGS[idx]);
+  });
+
+  /* Clic desde tabla */
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-fig-idx]');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.figIdx, 10);
+    if (!isNaN(idx)) abrirPanel(FIGS[idx]);
+  });
+})();
+
+/* ================================================================
+   TABLA DE IDENTIFICACIÓN DE MODOS
+   ================================================================ */
+(function(){
+  const tbody = document.getElementById('modosTablaBody');
+  if (!tbody) return;
+
+  FIGS.forEach((x, idx) => {
+    const tr = document.createElement('tr');
+    const alpha  = x.modo ? (ZEROS[x.modo[0]+','+x.modo[1]] || '—') : '—';
+    const frel   = x.modo && typeof alpha==='number'
+      ? (alpha/ZEROS['0,1']).toFixed(2)+'×' : '—';
+    const mlin   = x.modo ? x.modo[0] : '—';
+    const mani   = x.modo ? (x.modo[1]-1) : '—';
+    const badge  = x.modo
+      ? `<span class="modo-badge">(${x.modo[0]}, ${x.modo[1]})</span>`
+      : `<span class="modo-badge mudo">sin modo</span>`;
+    const sim    = x.modo
+      ? `<div class="mini-bessel-cell">
+           <canvas width="52" height="52"
+             data-m="${x.modo[0]}" data-n="${x.modo[1]}"
+             data-fig-idx="${idx}"
+             title="Ver modo (${x.modo[0]},${x.modo[1]}) con foto"></canvas>
+         </div>`
+      : `<div class="mini-bessel-cell" style="font-family:'JetBrains Mono',monospace;
+           font-size:.7rem;color:var(--tinta-soft);padding:.4rem">—</div>`;
+
+    tr.innerHTML = `
+      <td class="tc">${x.f}</td>
+      <td>${x.onda}</td>
+      <td>${badge}</td>
+      <td class="tc">${typeof alpha==='number'?alpha.toFixed(4):alpha}</td>
+      <td class="tc">${mlin} / ${mani}</td>
+      <td>${sim}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  /* Renderizar mini-canvas */
+  document.querySelectorAll('#modosTablaBody canvas[data-m]').forEach(cv => {
+    dibujarModo(cv, parseInt(cv.dataset.m), parseInt(cv.dataset.n), 0.09);
+  });
+})();
+
+/* ================================================================
+   LIGHTBOX (solo imágenes con data-lb fuera de la galería)
+   ================================================================ */
+(function(){
+  const lb    = document.getElementById('lightbox');
+  const img   = document.getElementById('lbImg');
+  const cap   = document.getElementById('lbCap');
+  const close = document.getElementById('lbClose');
+
+  document.body.addEventListener('click', e => {
+    const t = e.target;
+    if (t.tagName==='IMG' && t.dataset.lb && !t.dataset.idx) {
+      img.src=t.src; cap.textContent=t.dataset.lb; lb.classList.add('on');
     }
   });
-  function hide(){lb.classList.remove('on')}
-  lb.onclick=hide;close.onclick=hide;
-  addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
+  function hide(){ lb.classList.remove('on'); }
+  lb.onclick=hide; close.onclick=hide;
+  addEventListener('keydown', e => { if (e.key==='Escape') hide(); });
 })();
 
 /* ===== HERO animado ===== */
