@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento de Chladni · El sonido hecho visible</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>
+MathJax = { tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] }, svg:{fontCache:'global'} };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+:root{
+  --membrana:#13161b;
+  --membrana-2:#1c2027;
+  --membrana-3:#242932;
+  --semola:#e8d59a;
+  --semola-soft:#c9b984;
+  --tinta:#eef0f2;
+  --tinta-soft:#9aa0a8;
+  --linea:#2c313a;
+  --rojo:#c0623f;
+  --azul:#5b8fc9;
+  --verde:#7faa6e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--membrana);color:var(--tinta);
+  font-family:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+  line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+::selection{background:var(--semola);color:var(--membrana)}
+
+/* HERO */
+.hero{min-height:100vh;position:relative;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;padding:2rem;border-bottom:1px solid var(--linea)}
+#nodal-canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.55}
+.hero-content{position:relative;z-index:2;max-width:900px}
+.eyebrow{font-family:'JetBrains Mono','Consolas',monospace;font-size:.8rem;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--semola);margin-bottom:1.5rem}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-weight:600;
+  font-size:clamp(2.8rem,8vw,6rem);line-height:1.02;letter-spacing:-.02em;margin-bottom:1.5rem}
+.hero h1 em{font-style:italic;color:var(--semola)}
+.hero .sub{font-size:clamp(1rem,2.2vw,1.3rem);color:var(--tinta-soft);max-width:640px;margin:0 auto}
+.scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.3em;
+  color:var(--tinta-soft);text-transform:uppercase;z-index:2;animation:bob 2.4s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,8px)}}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(19,22,27,.9);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--linea)}
+nav ul{display:flex;gap:0;list-style:none;max-width:1100px;margin:0 auto;overflow-x:auto;scrollbar-width:none}
+nav ul::-webkit-scrollbar{display:none}
+nav a{display:block;padding:1rem 1rem;color:var(--tinta-soft);text-decoration:none;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;
+  text-transform:uppercase;white-space:nowrap;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+nav a:hover,nav a.active{color:var(--semola);border-bottom-color:var(--semola)}
+
+/* SECCIONES */
+section.block{max-width:860px;margin:0 auto;padding:5.5rem 1.5rem 1rem}
+section.wide{max-width:1140px}
+.sec-num{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--semola);
+  letter-spacing:.2em;margin-bottom:.6rem;display:block}
+h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(1.9rem,4.5vw,2.8rem);
+  letter-spacing:-.01em;margin-bottom:1.6rem;line-height:1.1}
+h3{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:1.45rem;margin:2.4rem 0 .9rem}
+h4{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.05rem;margin:1.6rem 0 .6rem;color:var(--semola-soft)}
+p{margin-bottom:1.15rem;color:#d4d8dd}
+p.lead{font-size:1.18rem;color:var(--tinta)}
+a.link{color:var(--semola);text-decoration:underline;text-underline-offset:3px}
+ul.dash{list-style:none;margin:0 0 1.2rem}
+ul.dash li{position:relative;padding-left:1.4rem;margin-bottom:.6rem;color:#d4d8dd}
+ul.dash li::before{content:'—';position:absolute;left:0;color:var(--semola)}
+strong{color:var(--semola-soft);font-weight:600}
+.divider{max-width:860px;margin:3rem auto 0;height:1px;background:var(--linea)}
+
+/* CALLOUT analogía */
+.analogia{background:linear-gradient(135deg,rgba(232,213,154,.07),rgba(91,143,201,.05));
+  border:1px solid var(--linea);border-radius:10px;padding:1.5rem 1.7rem;margin:1.8rem 0;position:relative}
+.analogia::before{content:'◐ EN PALABRAS SIMPLES';font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;letter-spacing:.15em;color:var(--semola);display:block;margin-bottom:.7rem}
+.analogia p:last-child{margin-bottom:0}
+
+/* ECUACIONES */
+.eq{background:var(--membrana-2);border:1px solid var(--linea);border-left:3px solid var(--semola);
+  padding:1.3rem 1.5rem;margin:1.5rem 0;border-radius:4px;overflow-x:auto}
+.eq .caption{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--tinta-soft);
+  margin-top:.7rem;letter-spacing:.04em;line-height:1.6}
+
+/* MONTAJE */
+.montaje-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:center;margin:1.8rem 0}
+.montaje-grid img{width:100%;border-radius:10px;border:1px solid var(--linea)}
+.specs{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;
+  background:var(--linea);border:1px solid var(--linea);margin:1.8rem 0;border-radius:6px;overflow:hidden}
+.spec{background:var(--membrana-2);padding:1.1rem}
+.spec .k{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--tinta-soft);margin-bottom:.4rem}
+.spec .v{font-family:'Fraunces',Georgia,serif;font-size:1.4rem;color:var(--semola)}
+.spec .v small{font-size:.85rem;color:var(--tinta-soft)}
+
+/* TABLA */
+.tabla-wrap{overflow-x:auto;margin:1.8rem 0}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:.8rem .9rem;text-align:left;border-bottom:1px solid var(--linea)}
+th{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--semola);font-weight:600}
+td{color:#d4d8dd}
+td.mono{font-family:'JetBrains Mono',monospace;color:var(--tinta)}
+tr:hover td{background:var(--membrana-2)}
+.tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;padding:.15rem .5rem;border-radius:3px;
+  background:rgba(232,213,154,.12);color:var(--semola);white-space:nowrap}
+.tag.sq{background:rgba(192,98,63,.15);color:var(--rojo)}
+.tag.tri{background:rgba(127,170,110,.15);color:var(--verde)}
+
+/* GALERÍA */
+.gal-filtros{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.5rem 0 2rem;justify-content:center}
+.gal-filtros button{font-family:'JetBrains Mono',monospace;font-size:.76rem;padding:.5rem .9rem;
+  background:var(--membrana-2);color:var(--tinta-soft);border:1px solid var(--linea);
+  border-radius:20px;cursor:pointer;transition:all .2s}
+.gal-filtros button:hover{border-color:var(--semola);color:var(--tinta)}
+.gal-filtros button.on{background:var(--semola);color:var(--membrana);border-color:var(--semola);font-weight:600}
+.galeria{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.2rem}
+.foto{background:var(--membrana-2);border:1px solid var(--linea);border-radius:10px;overflow:hidden;
+  transition:transform .25s,border-color .25s;cursor:pointer}
+.foto:hover{transform:translateY(-4px);border-color:var(--semola)}
+.foto img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.foto .cap{padding:.8rem .9rem}
+.foto .cap .freq{font-family:'Fraunces',Georgia,serif;font-size:1.25rem;color:var(--semola)}
+.foto .cap .tipo{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--tinta-soft);
+  letter-spacing:.08em;text-transform:uppercase;margin-top:.15rem}
+
+/* COMPARATIVA tipos de onda */
+.compara{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0}
+.compara .col{text-align:center}
+.compara .col img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid var(--linea)}
+.compara .col .lbl{font-family:'JetBrains Mono',monospace;font-size:.72rem;margin-top:.6rem;
+  letter-spacing:.06em;text-transform:uppercase}
+.compara .col .lbl.seno{color:var(--semola)}
+.compara .col .lbl.cuad{color:var(--rojo)}
+.compara .col .lbl.tri{color:var(--verde)}
+
+/* FIGURAS / VIDEOS */
+figure{margin:2rem 0}
+figure img{width:100%;border-radius:8px;border:1px solid var(--linea);display:block}
+figcaption{font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--tinta-soft);
+  margin-top:.8rem;letter-spacing:.02em;line-height:1.6}
+figcaption b{color:var(--semola)}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.4rem;margin:2rem 0}
+.vcard{background:var(--membrana-2);border:1px solid var(--linea);border-radius:10px;overflow:hidden;
+  transition:transform .25s,border-color .25s}
+.vcard:hover{transform:translateY(-4px);border-color:var(--semola)}
+.vcard video{width:100%;display:block;background:#000;aspect-ratio:474/850;object-fit:cover}
+.vcard .meta{padding:1rem 1.1rem}
+.vcard .meta .f{font-family:'Fraunces',Georgia,serif;font-size:1.5rem;color:var(--semola)}
+.vcard .meta .d{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--tinta-soft);
+  letter-spacing:.06em;margin-top:.2rem}
+
+/* VISUALIZADOR */
+.viz{background:var(--membrana-2);border:1px solid var(--linea);border-radius:12px;padding:1.8rem;margin:2rem 0}
+.viz-top{display:flex;flex-wrap:wrap;gap:1.5rem;align-items:center;justify-content:center}
+#bessel{border-radius:50%;background:radial-gradient(circle,#1a1d23,#0d0f13);
+  border:2px solid var(--linea);max-width:100%}
+.viz-ctrl{flex:1;min-width:240px}
+.modo-btns{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.2rem}
+.modo-btns button{font-family:'JetBrains Mono',monospace;font-size:.78rem;padding:.5rem .8rem;
+  background:var(--membrana);color:var(--tinta-soft);border:1px solid var(--linea);border-radius:5px;cursor:pointer;transition:all .2s}
+.modo-btns button:hover{border-color:var(--semola);color:var(--tinta)}
+.modo-btns button.on{background:var(--semola);color:var(--membrana);border-color:var(--semola);font-weight:600}
+.viz-info{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--tinta-soft);line-height:1.85}
+.viz-info span{color:var(--semola)}
+.slider-row{margin-top:1.2rem}
+.slider-row label{font-family:'JetBrains Mono',monospace;font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--tinta-soft);display:block;margin-bottom:.5rem}
+input[type=range]{width:100%;accent-color:var(--semola)}
+
+/* CONCLUSIONES */
+.conc{display:grid;gap:1rem;margin:1.8rem 0}
+.conc .card{background:var(--membrana-2);border:1px solid var(--linea);border-left:3px solid var(--semola);
+  border-radius:6px;padding:1.4rem 1.6rem}
+.conc .card .n{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--semola);
+  letter-spacing:.15em;margin-bottom:.5rem}
+.conc .card p{margin:0;font-size:.98rem}
+
+/* LIGHTBOX */
+.lightbox{position:fixed;inset:0;background:rgba(8,9,12,.95);z-index:200;display:none;
+  align-items:center;justify-content:center;padding:2rem;cursor:zoom-out}
+.lightbox.on{display:flex}
+.lightbox img{max-width:92%;max-height:82%;border-radius:8px;border:1px solid var(--linea)}
+.lightbox .lb-cap{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);
+  font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--semola);letter-spacing:.08em}
+.lightbox .lb-close{position:absolute;top:1.5rem;right:2rem;color:var(--tinta-soft);
+  font-size:2rem;cursor:pointer;line-height:1}
+
+/* FOOTER */
+footer{border-top:1px solid var(--linea);margin-top:4rem;padding:3rem 1.5rem;text-align:center}
+footer p{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--tinta-soft);letter-spacing:.04em;margin-bottom:.5rem}
+footer a{color:var(--semola)}
+
+@media(max-width:640px){
+  .montaje-grid{grid-template-columns:1fr}
+  .compara{grid-template-columns:1fr;gap:1.5rem}
+  .specs{grid-template-columns:repeat(2,1fr)}
+  section.block{padding-top:4rem}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <canvas id="nodal-canvas"></canvas>
+  <div class="hero-content">
+    <div class="eyebrow">Física III · Ondas y acústica · Universidad Distrital</div>
+    <h1>El sonido que <em>dibuja</em></h1>
+    <p class="sub">Experimento de Chladni sobre una membrana circular: 27 frecuencias, tres formas de onda y el análisis en Python que confirma la física detrás de cada patrón.</p>
+  </div>
+  <div class="scroll-hint">desliza ↓</div>
+</header>
+
+<nav>
+  <ul>
+    <li><a href="#intro">Introducción</a></li>
+    <li><a href="#objetivos">Objetivos</a></li>
+    <li><a href="#marco">Marco teórico</a></li>
+    <li><a href="#montaje">Montaje</a></li>
+    <li><a href="#galeria">Galería</a></li>
+    <li><a href="#analisis">Análisis</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#conclusiones">Conclusiones</a></li>
+  </ul>
+</nav>
+
+<!-- INTRODUCCIÓN -->
+<section class="block" id="intro">
+  <span class="sec-num">01 / Introducción</span>
+  <h2>Cuando el sonido toma forma</h2>
+  <p class="lead">Una onda sonora no se ve. Pero si la dejamos vibrar bajo una superficie cubierta de un material ligero, la materia se acomoda sola y dibuja la forma oculta de la vibración.</p>
+  <p>Cuando una superficie elástica entra en resonancia a cierta frecuencia, no vibra igual en todas partes: hay zonas que se mueven mucho (vientres) y zonas que se quedan completamente quietas. A esas zonas quietas las llamamos <strong>líneas nodales</strong>. Si esparcimos arena sobre la superficie, los granos saltan en las zonas que vibran y van cayendo, hasta quedarse atrapados justo sobre las líneas que no se mueven. El resultado es un dibujo nítido del modo de vibración: una <strong>figura de Chladni</strong>.</p>
+  <p>El montaje clásico de Ernst Chladni (siglo XVIII) usaba una placa metálica rígida frotada con un arco de violín. En este experimento cambiamos la placa por una <strong>membrana circular tensada</strong>: un guante de nitrilo estirado sobre una cavidad cilíndrica, excitado con sonido. Ese cambio es importante, porque una membrana y una placa siguen ecuaciones físicas distintas. Una membrana flexible vibra siguiendo las llamadas <strong>funciones de Bessel</strong>, y eso es exactamente lo que veremos reflejado en los patrones.</p>
+  <p>A lo largo de este informe documentamos los patrones obtenidos en <strong>27 configuraciones</strong> distintas (frecuencias de 100 Hz a 22 000 Hz, con ondas senoidal, cuadrada y triangular), y verificamos con <strong>análisis de audio y video en Python</strong> de ocho de ellos que lo que observamos coincide con la teoría.</p>
+</section>
+<div class="divider"></div>
+
+<!-- OBJETIVOS -->
+<section class="block" id="objetivos">
+  <span class="sec-num">02 / Objetivos</span>
+  <h2>Qué buscamos demostrar</h2>
+  <h3>Objetivo general</h3>
+  <p>Observar y caracterizar los patrones de ondas estacionarias que se forman sobre una membrana circular excitada con sonido a distintas frecuencias, y relacionarlos con la teoría de modos normales de vibración de una membrana.</p>
+  <h3>Objetivos específicos</h3>
+  <ul class="dash">
+    <li>Construir un montaje de bajo costo capaz de hacer visibles las líneas nodales de una membrana vibrante.</li>
+    <li>Registrar y clasificar los patrones generados entre 100 Hz y 22 000 Hz, comparando el efecto de las ondas senoidal, cuadrada y triangular a una misma frecuencia.</li>
+    <li>Verificar con un análisis FFT del audio que la frecuencia reproducida corresponde a la programada, y medir el contenido armónico de cada forma de onda.</li>
+    <li>Contrastar la observación central —más líneas nodales al subir la frecuencia— con la predicción de la teoría de Bessel para una membrana circular.</li>
+    <li>Identificar los límites del montaje (rango útil de frecuencias, efecto del orificio) y explicarlos físicamente.</li>
+  </ul>
+</section>
+<div class="divider"></div>
+
+<!-- MARCO TEÓRICO -->
+<section class="block" id="marco">
+  <span class="sec-num">03 / Marco teórico</span>
+  <h2>Por qué el sonido dibuja figuras</h2>
+
+  <h3>1. Ondas estacionarias: el origen de las líneas quietas</h3>
+  <p>Imagina una cuerda de guitarra. Al pulsarla vibra, pero sus extremos están fijos y nunca se mueven. Si la haces sonar en su tono más agudo, aparece además un punto quieto en la mitad. Esos puntos quietos se llaman <strong>nodos</strong>, y aparecen porque la onda rebota en los extremos y se superpone consigo misma formando una <strong>onda estacionaria</strong>: un patrón que parece quedarse en su lugar en vez de avanzar.</p>
+  <div class="analogia">
+    <p>Una membrana es como una cuerda, pero en dos dimensiones. En vez de puntos quietos aislados, tiene <strong>líneas enteras quietas</strong> que cruzan la superficie. La arena se acumula sobre esas líneas porque son los únicos lugares donde no la sacude la vibración. Cada figura de Chladni es, literalmente, un mapa de las zonas quietas de la membrana a esa frecuencia.</p>
+  </div>
+
+  <h3>2. La membrana circular y las funciones de Bessel</h3>
+  <p>Para describir cómo se mueve cada punto de la membrana usamos $u(r,\theta,t)$: el desplazamiento (hacia arriba o abajo) de un punto situado a una distancia $r$ del centro y a un ángulo $\theta$, en el instante $t$. La física dice que ese movimiento obedece la <strong>ecuación de onda en dos dimensiones</strong>:</p>
+  <div class="eq">
+    $$\frac{\partial^2 u}{\partial t^2} = c^2\nabla^2 u$$
+    <div class="caption">Lectura en palabras: la aceleración de cada punto de la membrana es proporcional a cuánto se "curva" la membrana a su alrededor. c es la velocidad a la que viaja una onda sobre ella.</div>
+  </div>
+  <p>La velocidad $c$ depende de dos cosas intuitivas: qué tan <strong>tensa</strong> está la membrana ($T$) y qué tan <strong>pesada</strong> es por unidad de área ($\sigma$). Más tensa = ondas más rápidas = tonos más agudos; más pesada = ondas más lentas = tonos más graves. Es la misma razón por la que una cuerda fina y tensa suena más aguda que una gruesa y floja:</p>
+  <div class="eq">
+    $$c=\sqrt{\frac{T}{\sigma}}$$
+    <div class="caption">T = tensión de la membrana · σ = masa por unidad de área (densidad superficial)</div>
+  </div>
+  <p>Al resolver la ecuación para una membrana <strong>circular sujeta por todo el borde</strong>, las soluciones —los modos de vibración— tienen esta forma:</p>
+  <div class="eq">
+    $$u_{mn}(r,\theta,t)=\underbrace{J_m\!\left(\frac{\alpha_{mn}\,r}{a}\right)}_{\text{forma radial}}\cdot\underbrace{\cos(m\theta)}_{\text{forma angular}}\cdot\underbrace{\cos(\omega_{mn}t)}_{\text{oscilación en el tiempo}}$$
+    <div class="caption">a = radio de la membrana. Cada modo se identifica con dos números enteros: m y n.</div>
+  </div>
+  <div class="analogia">
+    <p>La fórmula solo dice tres cosas multiplicadas. <strong>(1)</strong> La parte <em>angular</em> $\cos(m\theta)$ marca cuántas líneas quietas pasan por el centro como radios de una rueda: ese número es <strong>m</strong>. <strong>(2)</strong> La parte <em>radial</em>, que es la función de Bessel $J_m$, marca cuántos anillos quietos hay (círculos concéntricos): ese número está en <strong>n</strong>. <strong>(3)</strong> La última parte solo dice que todo eso sube y baja con el tiempo. Así, el modo $(m,n)$ es simplemente "tantas líneas en cruz, tantos anillos".</p>
+  </div>
+  <p>¿Y qué es la función de Bessel $J_m$? Es una curva que oscila parecido a un coseno, pero amortiguándose hacia afuera. Aparece siempre que un problema tiene <strong>simetría circular</strong> (tambores, ondas en un estanque, lentes). Lo único que necesitamos de ella son sus <strong>ceros</strong>: los puntos donde la curva cruza el cero, que es donde la membrana queda quieta. A esos ceros los llamamos $\alpha_{mn}$.</p>
+
+  <h3>3. Las frecuencias no salen a cualquier valor</h3>
+  <p>Como el borde de la membrana está sujeto, ahí el desplazamiento debe ser cero siempre. Esa condición obliga a que solo ciertas frecuencias "encajen" en la membrana, igual que en una cuerda solo encajan ciertas notas. Esas frecuencias permitidas son:</p>
+  <div class="eq">
+    $$f_{mn}=\frac{\alpha_{mn}}{2\pi a}\sqrt{\frac{T}{\sigma}}$$
+    <div class="caption">La frecuencia de cada modo es proporcional a su cero de Bessel α. Como los ceros crecen, las frecuencias permitidas también.</div>
+  </div>
+  <div class="analogia">
+    <p>Aquí está la diferencia clave con una cuerda. En una cuerda, las notas permitidas son múltiplos exactos de la primera (1×, 2×, 3×…): por eso suena "musical". En una membrana, las notas permitidas siguen los ceros de Bessel, que <strong>no</strong> son múltiplos exactos (1×, 1.59×, 2.14×, 2.30×…). Por eso un tambor suena más "ruidoso" que una cuerda: sus tonos no forman una serie armónica limpia. La consecuencia que veremos en el experimento es directa: <strong>a mayor frecuencia, modo más alto, y por tanto más líneas nodales dibujadas</strong>.</p>
+  </div>
+
+  <p>Esta tabla ordena los primeros modos por frecuencia creciente. Fíjate en la última columna: el número de líneas nodales sube con la frecuencia. Esa es la predicción que el experimento debe confirmar.</p>
+  <div class="tabla-wrap">
+  <table>
+    <thead><tr><th>Modo (m, n)</th><th>Cero α<sub>mn</sub></th><th>f / f<sub>fundamental</sub></th><th>Líneas en cruz (m)</th><th>Anillos (n−1)</th><th>Total nodos</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">(0, 1)</td><td class="mono">2.405</td><td class="mono">1.00×</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td class="mono">(1, 1)</td><td class="mono">3.832</td><td class="mono">1.59×</td><td>1</td><td>0</td><td>1</td></tr>
+      <tr><td class="mono">(2, 1)</td><td class="mono">5.136</td><td class="mono">2.14×</td><td>2</td><td>0</td><td>2</td></tr>
+      <tr><td class="mono">(0, 2)</td><td class="mono">5.520</td><td class="mono">2.30×</td><td>0</td><td>1</td><td>1</td></tr>
+      <tr><td class="mono">(3, 1)</td><td class="mono">6.380</td><td class="mono">2.65×</td><td>3</td><td>0</td><td>3</td></tr>
+      <tr><td class="mono">(1, 2)</td><td class="mono">7.016</td><td class="mono">2.92×</td><td>1</td><td>1</td><td>2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>4. Pruébalo tú: el simulador de modos</h3>
+  <p>Este simulador resuelve la fórmula de arriba en vivo. Cada botón es un modo $(m,n)$; las zonas claras son donde se juntaría la arena (las líneas nodales). Compara estos dibujos teóricos con tus fotos reales más abajo.</p>
+  <div class="viz">
+    <div class="viz-top">
+      <canvas id="bessel" width="320" height="320"></canvas>
+      <div class="viz-ctrl">
+        <div class="modo-btns" id="modoBtns"></div>
+        <div class="viz-info" id="vizInfo"></div>
+        <div class="slider-row">
+          <label>Grosor del trazo nodal</label>
+          <input type="range" id="thr" min="2" max="14" value="6">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- MONTAJE -->
+<section class="block" id="montaje">
+  <span class="sec-num">04 / Montaje experimental</span>
+  <h2>Cómo se construyó</h2>
+  <div class="montaje-grid">
+    <img src="montaje.jpg" alt="Montaje del experimento">
+    <div>
+      <p>Se usó una <strong>alcancía cilíndrica de cartón</strong> como cavidad resonante. Sobre su boca se tensó un <strong>guante de nitrilo</strong> sujeto con cauchos, que tras probar bolsa plástica, vinipel y globo resultó ser la mejor membrana. Como material indicador se usó <strong>arena</strong>. Un parlante reproduce los tonos generados con una aplicación simple.</p>
+      <p>El parlante (el cilindro negro) se acopla al orificio lateral para los tonos graves, o se acerca por encima de la membrana para los agudos.</p>
+    </div>
+  </div>
+  <div class="specs">
+    <div class="spec"><div class="k">Altura</div><div class="v">20.4<small> cm</small></div></div>
+    <div class="spec"><div class="k">Diámetro</div><div class="v">9.7<small> cm</small></div></div>
+    <div class="spec"><div class="k">Orificio</div><div class="v">2.6<small> cm Ø</small></div></div>
+    <div class="spec"><div class="k">Altura orificio</div><div class="v">5.5<small> cm</small></div></div>
+    <div class="spec"><div class="k">Membrana</div><div class="v">Nitrilo</div></div>
+    <div class="spec"><div class="k">Indicador</div><div class="v">Arena</div></div>
+  </div>
+  <p>El orificio lateral convierte la cavidad en un <strong>resonador de Helmholtz</strong>: el aire encerrado actúa como un resorte que transmite el sonido del parlante a la membrana. Este acoplamiento funciona bien con tonos graves (aproximadamente por debajo de 700 Hz). Por encima, la longitud de onda del sonido se vuelve comparable al tamaño del orificio y el acoplamiento pierde eficiencia, por lo que fue necesario acercar el parlante directamente a la membrana para excitar bien el patrón.</p>
+  <p><a class="link" href="https://www.youtube.com/watch?v=3oKqFNLXBT0" target="_blank" rel="noopener">▶ Video de referencia que guió el montaje</a></p>
+</section>
+<div class="divider"></div>
+
+<!-- GALERÍA -->
+<section class="block wide" id="galeria">
+  <span class="sec-num">05 / Galería completa</span>
+  <h2>Las 27 figuras obtenidas</h2>
+  <p>Todos los patrones registrados, de 100 Hz a 22 000 Hz. Usa los filtros para comparar por forma de onda, o toca cualquier figura para ampliarla. Observa cómo el patrón se vuelve más complejo —más líneas nodales— a medida que sube la frecuencia.</p>
+  <div class="gal-filtros" id="galFiltros">
+    <button data-f="all" class="on">Todas</button>
+    <button data-f="seno">Senoidal</button>
+    <button data-f="cuadrada">Cuadrada</button>
+    <button data-f="triangular">Triangular</button>
+    <button data-f="grave">Graves (&lt;500 Hz)</button>
+    <button data-f="aguda">Agudas (&gt;2 kHz)</button>
+  </div>
+  <div class="galeria" id="galGrid"></div>
+</section>
+<div class="divider"></div>
+
+<!-- ANÁLISIS -->
+<section class="block" id="analisis">
+  <span class="sec-num">06 / Análisis</span>
+  <h2>Leer los patrones</h2>
+  <p class="lead">El experimento se puede leer en dos ejes: cómo cambia el patrón con la <strong>frecuencia</strong>, y cómo cambia con la <strong>forma de onda</strong>. Los analizamos por separado.</p>
+
+  <h3>Eje 1 — La frecuencia controla el orden del patrón</h3>
+  <p>Recorriendo las figuras de grave a agudo se observa una progresión clara, que se puede dividir en cuatro regímenes:</p>
+
+  <h4>Régimen mudo (0–400 Hz)</h4>
+  <p>A frecuencias muy bajas (100 Hz, 300 Hz) la arena apenas se organiza: se ven manchas difusas sin un patrón definido. La razón física es que <strong>no existe ningún modo resonante de la membrana tan bajo</strong>. La membrana tiene una frecuencia fundamental mínima por debajo de la cual no hay onda estacionaria que ordene el material; lo que vemos es solo a la arena sacudiéndose sin estructura.</p>
+
+  <h4>Régimen de modos simples (350–700 Hz)</h4>
+  <p>Entre 350 y 700 Hz aparecen las primeras líneas nodales nítidas: una sola línea curva (modos con 1 nodo, como el $(1,1)$) que evoluciona hacia dos o tres lóbulos (modos $(2,1)$ y $(3,1)$). Son los patrones más limpios y simétricos, porque corresponden a los modos más bajos y mejor definidos. Aquí el acoplamiento por el orificio funciona de forma óptima.</p>
+
+  <h4>Régimen de transición (700–1200 Hz)</h4>
+  <p>Desde ~720 Hz fue necesario acercar el parlante a la membrana. Los patrones (840, 920, 970, 1220 Hz) ganan complejidad: aparecen combinaciones de líneas en cruz y anillos (modos con $m$ y $n$ mayores). Las figuras de 920 Hz y 1220 Hz muestran estructuras simétricas elaboradas, ya difíciles de asignar a un solo modo puro.</p>
+
+  <h4>Régimen de alto orden (&gt;2000 Hz)</h4>
+  <p>A 2170, 4887, 13000 y 22000 Hz los patrones se vuelven <strong>celulares</strong>: una retícula densa de pequeñas zonas separadas por finas líneas de arena. Esto corresponde a modos de orden muy alto, donde caben muchísimas líneas nodales en la membrana. Es la confirmación visual más espectacular de la teoría: a mayor frecuencia, mayor densidad nodal.</p>
+
+  <h3>Eje 2 — La forma de onda afecta la nitidez</h3>
+  <p>A una misma frecuencia se compararon las tres formas de onda. La diferencia es real pero sutil. Aquí están las tres a <strong>440 Hz</strong>:</p>
+  <div class="compara">
+    <div class="col"><img src="440hzseno.jpg" alt="440 Hz seno" data-lb="440 Hz · senoidal"><div class="lbl seno">Senoidal</div></div>
+    <div class="col"><img src="440hzcuadra.jpg" alt="440 Hz cuadrada" data-lb="440 Hz · cuadrada"><div class="lbl cuad">Cuadrada</div></div>
+    <div class="col"><img src="440hztriangu.jpg" alt="440 Hz triangular" data-lb="440 Hz · triangular"><div class="lbl tri">Triangular</div></div>
+  </div>
+  <p>Y a <strong>720 Hz</strong>, donde el patrón es más complejo:</p>
+  <div class="compara">
+    <div class="col"><img src="720hzseno.jpg" alt="720 Hz seno" data-lb="720 Hz · senoidal"><div class="lbl seno">Senoidal</div></div>
+    <div class="col"><img src="720hzcuadra.jpg" alt="720 Hz cuadrada" data-lb="720 Hz · cuadrada"><div class="lbl cuad">Cuadrada</div></div>
+    <div class="col"><img src="720hztriangu.jpg" alt="720 Hz triangular" data-lb="720 Hz · triangular"><div class="lbl tri">Triangular</div></div>
+  </div>
+  <div class="analogia">
+    <p>La onda <strong>senoidal</strong> es un tono puro: una sola frecuencia. Las ondas <strong>cuadrada</strong> y <strong>triangular</strong> no son puras: por el teorema de Fourier, equivalen a sumar muchas senoidales (la fundamental más sus armónicos). Eso significa que excitan varias frecuencias a la vez, depositando más energía en la membrana y marcando el patrón más rápido y con más contraste. La triangular en particular formó el patrón visiblemente más rápido en varias pruebas.</p>
+  </div>
+  <p>Para comprobar esto con datos y no solo a ojo, se hizo un análisis del audio en Python.</p>
+
+  <h3>Verificación cuantitativa con Python (FFT)</h3>
+  <p>Para comprobar todo esto con datos y no solo a ojo, se extrajo el audio de ocho videos y se les aplicó la <strong>Transformada Rápida de Fourier (FFT)</strong>, que descompone un sonido en las frecuencias que lo forman. Si la onda cuadrada realmente contiene armónicos, la FFT debe mostrarlos como picos adicionales junto a la fundamental. Los espectros completos y la tabla de mediciones están en la sección de resultados.</p>
+</section>
+<div class="divider"></div>
+
+<!-- RESULTADOS -->
+<section class="block" id="resultados">
+  <span class="sec-num">07 / Resultados</span>
+  <h2>Los datos</h2>
+  <p>Se analizaron <strong>ocho videos</strong> con FFT. En siete de ellos la frecuencia medida coincide con la programada con un error menor al 0.2 %, validando el control del experimento. El octavo (13 000 Hz) reveló una limitación del equipo de grabación que se explica más abajo.</p>
+  <div class="tabla-wrap">
+  <table>
+    <thead><tr><th>Frecuencia</th><th>Onda</th><th>Medida FFT</th><th>Error</th><th>Armónicos detectados</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">350 Hz</td><td><span class="tag">seno</span></td><td class="mono">349.9 Hz</td><td class="mono">0.0 %</td><td>ninguno (tono puro)</td></tr>
+      <tr><td class="mono">550 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">550.9 Hz</td><td class="mono">0.2 %</td><td class="mono">3f, 5f</td></tr>
+      <tr><td class="mono">650 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">649.3 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
+      <tr><td class="mono">720 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">720.4 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
+      <tr><td class="mono">840 Hz</td><td><span class="tag tri">triangular</span></td><td class="mono">840.8 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
+      <tr><td class="mono">920 Hz</td><td><span class="tag">seno</span></td><td class="mono">918.8 Hz</td><td class="mono">0.1 %</td><td>ninguno (tono puro)</td></tr>
+      <tr><td class="mono">970 Hz</td><td><span class="tag sq">cuadrada</span></td><td class="mono">970.8 Hz</td><td class="mono">0.1 %</td><td class="mono">3f</td></tr>
+      <tr><td class="mono">13 kHz</td><td><span class="tag sq">cuadrada</span></td><td class="mono" style="color:var(--rojo)">1301 Hz ⚠</td><td class="mono" style="color:var(--rojo)">90 %</td><td>distorsionados</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <figure>
+    <img src="espectros_fft.png" alt="Espectros FFT de los 8 videos">
+    <figcaption><b>Fig. 1 —</b> Espectros de los 8 videos. Las <b>senoidales</b> (350 y 920 Hz, azul) son picos limpios y solitarios. Las <b>cuadradas</b> (550, 650, 970 Hz, naranja) y las <b>triangulares</b> (720, 840 Hz, verde) muestran armónicos (picos en 3f). El caso de <b>13 kHz</b> (rojo) aparece distorsionado: el micrófono midió 1301 Hz en lugar de 13 000 Hz.</figcaption>
+  </figure>
+
+  <div class="analogia">
+    <p><strong>El caso de los 13 000 Hz y el límite del micrófono.</strong> En este video la FFT no midió 13 kHz sino 1301 Hz, con un espectro lleno de picos desordenados. Esto no es un fallo del experimento: el patrón en la membrana sí se formó (y es de los más densos y bonitos). Lo que falla es la <strong>grabación</strong>: el micrófono de un teléfono está optimizado para la voz humana y empieza a distorsionar o atenuar las frecuencias muy altas, plegándolas hacia abajo (un efecto relacionado con el <em>aliasing</em>). Es una limitación instrumental conocida y un buen recordatorio de que medir un fenómeno y registrarlo fielmente son dos retos distintos.</p>
+  </div>
+
+  <h3>Detección automática de líneas nodales</h3>
+  <p>El segundo análisis procesa el video cuadro a cuadro: aísla la membrana con un detector de círculos y separa la arena clara del fondo oscuro, contando las regiones del patrón como medida del orden modal.</p>
+  <figure>
+    <img src="nodos_970hz.png" alt="Detección de nodos a 970 Hz">
+    <figcaption><b>Fig. 2 —</b> Cuadro final del video de 970 Hz. <b>Izq.:</b> membrana original con la región circular detectada (verde). <b>Der.:</b> la arena segmentada, revelando un patrón de orden alto con varias líneas nodales.</figcaption>
+  </figure>
+
+  <p>Los ocho videos analizados, en orden de frecuencia creciente:</p>
+  <div class="video-grid">
+    <div class="vcard"><video src="v350_seno.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">350 Hz</div><div class="d">SENO</div></div></div>
+    <div class="vcard"><video src="v550_cuadrada.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">550 Hz</div><div class="d">CUADRADA</div></div></div>
+    <div class="vcard"><video src="v650_cuadrada.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">650 Hz</div><div class="d">CUADRADA</div></div></div>
+    <div class="vcard"><video src="v720_triangular.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">720 Hz</div><div class="d">TRIANGULAR</div></div></div>
+    <div class="vcard"><video src="v840_triangular.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">840 Hz</div><div class="d">TRIANGULAR</div></div></div>
+    <div class="vcard"><video src="v920_seno.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">920 Hz</div><div class="d">SENO</div></div></div>
+    <div class="vcard"><video src="v970_cuadrada.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">970 Hz</div><div class="d">CUADRADA</div></div></div>
+    <div class="vcard"><video src="v13000_cuadrada.mp4" controls loop muted playsinline preload="metadata"></video>
+      <div class="meta"><div class="f">13 kHz</div><div class="d">CUADRADA · ALTO ORDEN</div></div></div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- CONCLUSIONES -->
+<section class="block" id="conclusiones">
+  <span class="sec-num">08 / Conclusiones</span>
+  <h2>Qué aprendimos</h2>
+  <div class="conc">
+    <div class="card"><div class="n">01 · LA FRECUENCIA ORDENA EL PATRÓN</div><p>El número y la complejidad de las líneas nodales crecen de forma sistemática con la frecuencia, desde una sola línea curva a ~440 Hz hasta los patrones celulares densos por encima de 13 000 Hz. Esto confirma directamente la predicción de la teoría de Bessel para una membrana circular.</p></div>
+    <div class="card"><div class="n">02 · LA FORMA DE ONDA IMPORTA</div><p>Las ondas cuadrada y triangular marcan los patrones con más nitidez y rapidez que la senoidal. El análisis FFT lo explica: contienen armónicos (picos en 3f, 5f…) que la senoidal no tiene, aportando energía extra a la membrana.</p></div>
+    <div class="card"><div class="n">03 · EL MONTAJE FUE VALIDADO</div><p>Las frecuencias medidas por FFT coinciden con las programadas (error &lt; 0.2 %), de modo que cada patrón corresponde de forma fiable a su frecuencia etiquetada.</p></div>
+    <div class="card"><div class="n">04 · ES UNA MEMBRANA, NO UNA PLACA</div><p>A diferencia del Chladni clásico con placa rígida, aquí los patrones siguen los modos de una membrana flexible (funciones de Bessel). Reconocer esto es clave para interpretar correctamente las figuras observadas.</p></div>
+    <div class="card"><div class="n">05 · LÍMITES Y REALIDAD DEL MONTAJE</div><p>No hay patrones por debajo de ~350 Hz (no existe un modo tan bajo) y a altas frecuencias hubo que acercar el parlante (el orificio deja de acoplar bien). El análisis FFT también reveló que el micrófono del teléfono no registra fielmente frecuencias muy altas (el video de 13 kHz se midió como 1301 Hz). Y al ser una membrana casera con tensión no perfectamente uniforme, los patrones son algo menos simétricos que el modelo ideal. Todas son limitaciones esperables del montaje, no errores de medición.</p></div>
+  </div>
+</section>
+
+<footer>
+  <p>Experimento de Chladni · Modos de vibración de una membrana circular</p>
+  <p>Física III · Universidad Distrital Francisco José de Caldas</p>
+  <p>27 configuraciones registradas · Análisis de audio y video con Python (OpenCV · SciPy · FFT)</p>
+</footer>
+
+<div class="lightbox" id="lightbox">
+  <span class="lb-close" id="lbClose">×</span>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<script>
+/* ===== CATÁLOGO DE FIGURAS ===== */
+const FIGS=[
+  {f:"100 Hz",  hz:100,  onda:"seno",      img:"100hz.jpg",            nota:"régimen mudo"},
+  {f:"300 Hz",  hz:300,  onda:"seno",      img:"300hz.jpg",            nota:"régimen mudo"},
+  {f:"350 Hz",  hz:350,  onda:"seno",      img:"350hzseno.jpg"},
+  {f:"440 Hz",  hz:440,  onda:"seno",      img:"440hzseno.jpg"},
+  {f:"440 Hz",  hz:440,  onda:"cuadrada",  img:"440hzcuadra.jpg"},
+  {f:"440 Hz",  hz:440,  onda:"triangular",img:"440hztriangu.jpg"},
+  {f:"550 Hz",  hz:550,  onda:"seno",      img:"550hzseno.jpg"},
+  {f:"550 Hz",  hz:550,  onda:"cuadrada",  img:"550hzcuadra.jpg"},
+  {f:"550 Hz",  hz:550,  onda:"triangular",img:"550hztriangu.jpg"},
+  {f:"650 Hz",  hz:650,  onda:"cuadrada",  img:"650hzcuadrado.jpg"},
+  {f:"720 Hz",  hz:720,  onda:"seno",      img:"720hzseno.jpg"},
+  {f:"720 Hz",  hz:720,  onda:"cuadrada",  img:"720hzcuadra.jpg"},
+  {f:"720 Hz",  hz:720,  onda:"triangular",img:"720hztriangu.jpg"},
+  {f:"840 Hz",  hz:840,  onda:"seno",      img:"840hzseno.jpg"},
+  {f:"840 Hz",  hz:840,  onda:"triangular",img:"840hztriangu.jpg"},
+  {f:"888 Hz",  hz:888,  onda:"seno",      img:"888hzseno.jpg"},
+  {f:"920 Hz",  hz:920,  onda:"triangular",img:"920hztriangu.jpg"},
+  {f:"920 Hz",  hz:920,  onda:"cuadrada",  img:"920hzcuadraarriba.jpg",  nota:"parlante arriba"},
+  {f:"920 Hz",  hz:920,  onda:"seno",      img:"920hzsenoarriba.jpg",    nota:"parlante arriba"},
+  {f:"920 Hz",  hz:920,  onda:"triangular",img:"920hztrianguarriba.jpg", nota:"parlante arriba"},
+  {f:"970 Hz",  hz:970,  onda:"cuadrada",  img:"970hzcuadrada.jpg"},
+  {f:"1220 Hz", hz:1220, onda:"cuadrada",  img:"1220hzcuadrado.jpg"},
+  {f:"2170 Hz", hz:2170, onda:"seno",      img:"2170hzseno.jpg",       nota:"alto orden"},
+  {f:"4887 Hz", hz:4887, onda:"seno",      img:"4887hzseno.jpg",       nota:"alto orden"},
+  {f:"13 kHz",  hz:13000,onda:"cuadrada",  img:"13000hzcuadrado.jpg",  nota:"patrón celular"},
+  {f:"22 kHz",  hz:22000,onda:"cuadrada",  img:"22000hzcuadrado.jpg",  nota:"patrón celular"},
+];
+
+(function(){
+  const g=document.getElementById('galGrid');
+  function render(filtro){
+    g.innerHTML='';
+    FIGS.filter(x=>{
+      if(filtro==='all')return true;
+      if(filtro==='grave')return x.hz<500;
+      if(filtro==='aguda')return x.hz>=2000;
+      return x.onda===filtro;
+    }).forEach(x=>{
+      const d=document.createElement('div');
+      d.className='foto';
+      const cap=x.nota?x.onda+' · '+x.nota:x.onda;
+      d.innerHTML=`<img src="${x.img}" alt="${x.f} ${x.onda}" loading="lazy"
+                    data-lb="${x.f} · ${x.onda}${x.nota?' · '+x.nota:''}">
+                   <div class="cap"><div class="freq">${x.f}</div><div class="tipo">${cap}</div></div>`;
+      g.appendChild(d);
+    });
+  }
+  render('all');
+  document.querySelectorAll('#galFiltros button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#galFiltros button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      render(b.dataset.f);
+    };
+  });
+})();
+
+/* ===== LIGHTBOX ===== */
+(function(){
+  const lb=document.getElementById('lightbox'),img=document.getElementById('lbImg'),
+        cap=document.getElementById('lbCap'),close=document.getElementById('lbClose');
+  document.body.addEventListener('click',e=>{
+    const t=e.target;
+    if(t.tagName==='IMG'&&t.dataset.lb){
+      img.src=t.src;cap.textContent=t.dataset.lb;lb.classList.add('on');
+    }
+  });
+  function hide(){lb.classList.remove('on')}
+  lb.onclick=hide;close.onclick=hide;
+  addEventListener('keydown',e=>{if(e.key==='Escape')hide()});
+})();
+
+/* ===== HERO animado ===== */
+(function(){
+  const c=document.getElementById('nodal-canvas'),x=c.getContext('2d');
+  let w,h,t=0;
+  function size(){w=c.width=innerWidth;h=c.height=innerHeight;}
+  size();addEventListener('resize',size);
+  const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  function draw(){
+    x.clearRect(0,0,w,h);
+    const cx=w/2,cy=h/2,R=Math.min(w,h)*0.42;
+    x.save();x.translate(cx,cy);
+    const m=3,n=2;
+    for(let i=0;i<2200;i++){
+      const r=Math.random()*R, th=Math.random()*Math.PI*2;
+      const u=Math.cos(m*th)*Math.cos((n+.5)*Math.PI*r/R + t);
+      if(Math.abs(u)<0.06){
+        const px=r*Math.cos(th),py=r*Math.sin(th);
+        x.fillStyle='rgba(232,213,154,'+(0.5*(1-r/R))+')';
+        x.fillRect(px,py,1.5,1.5);
+      }
+    }
+    x.restore();
+    if(!reduce)t+=0.006;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ===== SIMULADOR BESSEL ===== */
+(function(){
+  const Z={0:[2.4048,5.5201,8.6537],1:[3.8317,7.0156,10.1735],
+           2:[5.1356,8.4172,11.6198],3:[6.3802,9.7610,13.0152]};
+  const modos=[[0,1],[1,1],[2,1],[0,2],[3,1],[1,2],[2,2]];
+  const cv=document.getElementById('bessel'),g=cv.getContext('2d');
+  const btns=document.getElementById('modoBtns'),info=document.getElementById('vizInfo');
+  const thr=document.getElementById('thr');
+  let cur=4;
+  function J(m,x){let s=0;for(let k=0;k<25;k++){s+=Math.pow(-1,k)/(fac(k)*fac(k+m))*Math.pow(x/2,2*k+m);}return s;}
+  function fac(n){let r=1;for(let i=2;i<=n;i++)r*=i;return r;}
+  function render(){
+    const [m,n]=modos[cur],a=Z[m][n-1];
+    const W=cv.width,Hh=cv.height,cx=W/2,cy=Hh/2,R=W/2-4;
+    g.clearRect(0,0,W,Hh);
+    const im=g.createImageData(W,Hh),tol=parseFloat(thr.value)/100;
+    for(let py=0;py<Hh;py++)for(let px=0;px<W;px++){
+      const dx=px-cx,dy=py-cy,r=Math.sqrt(dx*dx+dy*dy),idx=(py*W+px)*4;
+      if(r>R){im.data[idx+3]=0;continue;}
+      const th=Math.atan2(dy,dx),u=J(m,a*r/R)*Math.cos(m*th);
+      if(Math.abs(u)<tol){im.data[idx]=232;im.data[idx+1]=213;im.data[idx+2]=154;im.data[idx+3]=255;}
+      else{const v=Math.min(255,40+Math.abs(u)*60);im.data[idx]=v*.55;im.data[idx+1]=v*.6;im.data[idx+2]=v*.7;im.data[idx+3]=255;}
+    }
+    g.putImageData(im,0,0);
+    info.innerHTML='Modo <span>('+m+', '+n+')</span><br>Cero de Bessel α = <span>'+a.toFixed(3)+'</span><br>'+
+      'Líneas en cruz: <span>'+m+'</span><br>Anillos: <span>'+(n-1)+'</span><br>'+
+      'Frecuencia: <span>'+(a/Z[0][0]).toFixed(2)+'×</span> la fundamental';
+  }
+  modos.forEach((md,i)=>{
+    const b=document.createElement('button');b.textContent='('+md[0]+','+md[1]+')';
+    b.onclick=()=>{cur=i;[...btns.children].forEach(x=>x.classList.remove('on'));b.classList.add('on');render();};
+    if(i===cur)b.classList.add('on');btns.appendChild(b);
+  });
+  thr.oninput=render;render();
+})();
+
+/* ===== NAV activo ===== */
+(function(){
+  const links=[...document.querySelectorAll('nav a')];
+  const secs=links.map(a=>document.querySelector(a.getAttribute('href')));
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+    const id='#'+e.target.id;links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')===id));}});},
+    {rootMargin:'-40% 0px -55% 0px'});
+  secs.forEach(s=>s&&obs.observe(s));
+})();
+</script>
+</body>
+</html>
